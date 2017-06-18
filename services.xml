@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+
+        <service id="container" synthetic="true"/>
+
+        <service id="command_producer" class="Tg\RedisQueue\Command\ProducerCommand">
+            <argument type="service" id="job_enqueue_service"/>
+            <argument type="service" id="status_service"/>
+        </service>
+
+        <service id="command_consumer" class="Tg\RedisQueue\Command\ConsumerCommand">
+            <argument type="service" id="consume_service"/>
+        </service>
+
+        <service id="command_schedule" class="Tg\RedisQueue\Command\ScheduleCommand">
+            <argument type="service" id="schedule_service"/>
+        </service>
+
+        <service id="schedule_service" class="Tg\RedisQueue\Consumer\Service\ScheduleService">
+            <argument type="service" id="redis"/>
+        </service>
+
+        <service id="status_service" class="Tg\RedisQueue\Consumer\Service\StatusService">
+            <argument type="service" id="redis"/>
+            <argument type="service" id="datetime_provider"/>
+        </service>
+
+        <service id="job_enqueue_service" class="Tg\RedisQueue\Consumer\Service\JobEnqueueService">
+            <argument type="service" id="redis"/>
+            <argument type="service" id="status_service"/>
+        </service>
+
+        <service id="consume_service" class="Tg\RedisQueue\Consumer\Service\ConsumeService">
+            <argument type="service" id="redis"/>
+        </service>
+
+        <service id="datetime_provider" class="Tg\RedisQueue\Consumer\Service\DateTimeProvider">
+            <argument type="service" id="redis"/>
+        </service>
+
+        <service id="redis">
+            <factory class="Tg\RedisQueue\Redis\RedisFactory" method="create"/>
+        </service>
+
+
+    </services>
+</container>

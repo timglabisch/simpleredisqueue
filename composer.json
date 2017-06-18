@@ -1,0 +1,22 @@
+{
+  "name": "kafka/example",
+  "description": "kafka example",
+  "license": "MIT",
+  "require": {
+    "symfony/config": "^3.3",
+    "symfony/console": "^3.3",
+    "symfony/dependency-injection": "^3.3",
+    "monolog/monolog": "^1.22"
+  },
+  "authors": [
+    {
+      "name": "timglabisch",
+      "email": "github@tim.ainfach.de"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Tg\\RedisQueue\\": "src/"
+    }
+  }
+}
