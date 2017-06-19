@@ -20,25 +20,25 @@
             <argument type="service" id="schedule_service"/>
         </service>
 
-        <service id="schedule_service" class="Tg\RedisQueue\Consumer\Service\ScheduleService">
+        <service id="schedule_service" class="Tg\RedisQueue\Service\ScheduleService">
             <argument type="service" id="redis"/>
         </service>
 
-        <service id="status_service" class="Tg\RedisQueue\Consumer\Service\StatusService">
+        <service id="status_service" class="Tg\RedisQueue\Service\StatusService">
             <argument type="service" id="redis"/>
             <argument type="service" id="datetime_provider"/>
         </service>
 
-        <service id="job_enqueue_service" class="Tg\RedisQueue\Consumer\Service\JobEnqueueService">
+        <service id="job_enqueue_service" class="Tg\RedisQueue\Service\JobEnqueueService">
             <argument type="service" id="redis"/>
             <argument type="service" id="status_service"/>
         </service>
 
-        <service id="consume_service" class="Tg\RedisQueue\Consumer\Service\ConsumeService">
+        <service id="consume_service" class="Tg\RedisQueue\Service\ConsumeService">
             <argument type="service" id="redis"/>
         </service>
 
-        <service id="datetime_provider" class="Tg\RedisQueue\Consumer\Service\DateTimeProvider">
+        <service id="datetime_provider" class="Tg\RedisQueue\Service\DateTimeProvider">
             <argument type="service" id="redis"/>
         </service>
 

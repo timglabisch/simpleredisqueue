@@ -5,8 +5,8 @@ namespace Tg\RedisQueue\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Tg\RedisQueue\Consumer\ConsumerContext;
-use Tg\RedisQueue\Consumer\Service\ConsumeService;
+use Tg\RedisQueue\ConsumerContext;
+use Tg\RedisQueue\Service\ConsumeService;
 
 class ConsumerCommand extends Command
 {
@@ -67,8 +67,10 @@ class ConsumerCommand extends Command
             $output->writeln("Work on Job " . $job);
         }
 
-        $output->writeln("Commit Work");
-        $this->consumeService->commitWorkQueue($consumerContext);
+        if (!empty($jobs)) {
+            $output->writeln("Commit Work");
+            $this->consumeService->commitWorkQueue($consumerContext);
+        }
 
         $output->writeln("Finish Work");
     }

@@ -5,7 +5,7 @@ namespace Tg\RedisQueue\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Tg\RedisQueue\Consumer\Service\ScheduleService;
+use Tg\RedisQueue\Service\ScheduleService;
 
 class ScheduleCommand extends Command
 {

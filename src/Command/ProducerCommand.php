@@ -5,8 +5,8 @@ namespace Tg\RedisQueue\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Tg\RedisQueue\Consumer\Service\JobEnqueueService;
-use Tg\RedisQueue\Consumer\Service\StatusService;
+use Tg\RedisQueue\Service\JobEnqueueService;
+use Tg\RedisQueue\Service\StatusService;
 use Tg\RedisQueue\Job;
 
 class ProducerCommand extends Command

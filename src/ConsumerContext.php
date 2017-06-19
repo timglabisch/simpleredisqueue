@@ -1,6 +1,6 @@
 <?php
 
-namespace Tg\RedisQueue\Consumer;
+namespace Tg\RedisQueue;
 
 class ConsumerContext
 {

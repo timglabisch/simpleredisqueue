@@ -1,8 +1,8 @@
 <?php
 
-namespace Tg\RedisQueue\Consumer\Service;
+namespace Tg\RedisQueue\Service;
 
-use Tg\RedisQueue\Consumer\ConsumerContext;
+use Tg\RedisQueue\ConsumerContext;
 
 class ConsumeService
 {

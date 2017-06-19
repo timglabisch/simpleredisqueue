@@ -1,6 +1,6 @@
 <?php
 
-namespace Tg\RedisQueue\Consumer\Service;
+namespace Tg\RedisQueue\Service;
 
 
 class DateTimeProvider
