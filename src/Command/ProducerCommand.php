@@ -2,14 +2,11 @@
 
 namespace Tg\RedisQueue\Command;
 
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Tg\RedisQueue\Service\JobEnqueueService;
 use Tg\RedisQueue\Service\StatusService;
-use Tg\RedisQueue\Job;
+use Tg\RedisQueue\Dto\Job;
 
-class ProducerCommand extends Command
+class ProducerCommand
 {
     /** @var JobEnqueueService */
     private $jobEnqueueService;
@@ -20,16 +17,9 @@ class ProducerCommand extends Command
     public function __construct(
         JobEnqueueService $jobEnqueueService,
         StatusService $statusService
-    )
-    {
-        parent::__construct('producer');
+    ) {
         $this->jobEnqueueService = $jobEnqueueService;
         $this->statusService = $statusService;
-    }
-
-    protected function configure()
-    {
-        $this->setName('producer');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

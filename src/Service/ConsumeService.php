@@ -2,7 +2,10 @@
 
 namespace Tg\RedisQueue\Service;
 
-use Tg\RedisQueue\ConsumerContext;
+use Tg\RedisQueue\Consumer\ConsumerContext;
+use Tg\RedisQueue\Dto\Job;
+use Tg\RedisQueue\Dto\EnqueuedJob;
+use Tg\RedisQueue\Dto\EnqueuedJobInterface;
 
 class ConsumeService
 {
@@ -14,12 +17,21 @@ class ConsumeService
         $this->redis = $redis;
     }
 
-    public function getJobsFromWorkingQueue(ConsumerContext $consumerContext)
+    /** @return EnqueuedJobInterface[] */
+    public function getJobsFromWorkingQueue(ConsumerContext $consumerContext): array
     {
-        return $this->redis->lRange($consumerContext->getWorkQueue(), 0, 1);
+        $rawJobs = $this->redis->lRange($consumerContext->getWorkQueue(), 0, 1);
+
+        return array_map(
+            function (string $data) {
+                return EnqueuedJob::newFromDecode($data);
+            },
+            $rawJobs
+        );
     }
 
-    public function getJobs(ConsumerContext $consumerContext)
+    /** @return EnqueuedJobInterface[] */
+    public function getJobs(ConsumerContext $consumerContext): array
     {
 
         $jobs = [];
@@ -49,8 +61,12 @@ class ConsumeService
             continue;
         }
 
-        return $jobs;
-
+        return array_map(
+            function (string $data) {
+                return EnqueuedJob::newFromDecode($data);
+            },
+            $jobs
+        );
     }
 
     public function commitWorkQueue(ConsumerContext $consumerContext)

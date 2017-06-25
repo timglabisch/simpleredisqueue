@@ -2,11 +2,11 @@
 
 namespace Tg\RedisQueue\Service;
 
-use Tg\RedisQueue\JobInterface;
-use Tg\RedisQueue\Status;
+use Tg\RedisQueue\Dto\JobInterface;
+use Tg\RedisQueue\Dto\Status;
 use Tg\RedisQueue\Status\StatusEntry;
-use Tg\RedisQueue\TrackedJob;
-use Tg\RedisQueue\TrackedJobInterface;
+use Tg\RedisQueue\Dto\EnqueuedJob;
+use Tg\RedisQueue\Dto\EnqueuedJobInterface;
 
 class StatusService
 {
@@ -22,12 +22,12 @@ class StatusService
         $this->dateTimeProvider = $dateTimeProvider;
     }
 
-    public function createStatus(TrackedJobInterface $trackedJob)
+    public function createStatus(EnqueuedJobInterface $trackedJob)
     {
         $this->addStatus($trackedJob, StatusEntry::STATUS_CREATED, '');
     }
 
-    public function addStatus(TrackedJobInterface $trackedJob, $identifer, string $value)
+    public function addStatus(EnqueuedJobInterface $trackedJob, $identifer, string $value)
     {
         $statuskey = 'status:' . $trackedJob->getJobId();
 
@@ -44,7 +44,7 @@ class StatusService
         }
     }
 
-    public function getStatus(TrackedJobInterface $trackedJob): Status
+    public function getStatus(EnqueuedJobInterface $trackedJob): Status
     {
         return $this->getStatusByJobId($trackedJob->getJobId());
     }

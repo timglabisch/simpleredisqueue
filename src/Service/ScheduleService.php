@@ -3,7 +3,7 @@
 namespace Tg\RedisQueue\Service;
 
 
-use Tg\RedisQueue\Schedule;
+use Tg\RedisQueue\Dto\Schedule;
 
 class ScheduleService
 {

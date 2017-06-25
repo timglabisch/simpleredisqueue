@@ -3,10 +3,7 @@
   "description": "kafka example",
   "license": "MIT",
   "require": {
-    "symfony/config": "^3.3",
-    "symfony/console": "^3.3",
-    "symfony/dependency-injection": "^3.3",
-    "monolog/monolog": "^1.22"
+    "psr/log": "1.*"
   },
   "authors": [
     {

@@ -1,6 +1,8 @@
 <?php
 
-namespace Tg\RedisQueue;
+namespace Tg\RedisQueue\Dto;
+
+use Tg\RedisQueue\Dto\JobInterface;
 
 class Job implements JobInterface
 {

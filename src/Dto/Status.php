@@ -1,6 +1,6 @@
 <?php
 
-namespace Tg\RedisQueue;
+namespace Tg\RedisQueue\Dto;
 
 
 use Tg\RedisQueue\Status\StatusEntry;

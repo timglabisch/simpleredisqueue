@@ -42,6 +42,11 @@
             <argument type="service" id="redis"/>
         </service>
 
+        <service id="consumer_runtime" class="Tg\RedisQueue\IsolatedConsumerRuntime">
+            <argument type="service" id="job_enqueue_service"/>
+            <argument type="service" id="status_service"/>
+        </service>
+
         <service id="redis">
             <factory class="Tg\RedisQueue\Redis\RedisFactory" method="create"/>
         </service>

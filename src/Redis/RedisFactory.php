@@ -5,10 +5,13 @@ namespace Tg\RedisQueue\Redis;
 class RedisFactory
 {
 
-    public static function create(): \Redis {
+    public static function create(
+        $host,
+        $port
+    ): \Redis {
 
         $redis = new \Redis();
-        $redis->connect('127.0.0.1', 6379);
+        $redis->connect($host, $port);
         $redis->ping();
 
         return $redis;

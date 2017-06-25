@@ -3,9 +3,9 @@
 namespace Tg\RedisQueue\Service;
 
 
-use Tg\RedisQueue\JobInterface;
-use Tg\RedisQueue\TrackedJob;
-use Tg\RedisQueue\TrackedJobInterface;
+use Tg\RedisQueue\Dto\JobInterface;
+use Tg\RedisQueue\Dto\EnqueuedJob;
+use Tg\RedisQueue\Dto\EnqueuedJobInterface;
 
 class JobEnqueueService
 {
@@ -21,15 +21,15 @@ class JobEnqueueService
         $this->statusService = $statusService;
     }
 
-    public function enqueue(string $queue, JobInterface $job): TrackedJobInterface
+    public function enqueue(string $queue, JobInterface $job): EnqueuedJobInterface
     {
         $id = uniqid('', true) . uniqid('', true);
 
-        $trackedJob = new TrackedJob($id, $job);
+        $trackedJob = new EnqueuedJob($id, $job);
 
         $this->statusService->createStatus($trackedJob);
 
-        $this->redis->lPush($queue, $job->getBody());
+        $this->redis->lPush($queue, $trackedJob->encode());
 
         return $trackedJob;
     }

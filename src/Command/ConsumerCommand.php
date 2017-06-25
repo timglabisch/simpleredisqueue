@@ -2,77 +2,83 @@
 
 namespace Tg\RedisQueue\Command;
 
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Tg\RedisQueue\ConsumerContext;
+use Psr\Log\LoggerInterface;
+use Tg\RedisQueue\Consumer\ConsumerContext;
+use Tg\RedisQueue\Consumer\Runtime\ConsumerRuntimeInterface;
+use Tg\RedisQueue\Consumer\IsolatedConsumerInterface;
 use Tg\RedisQueue\Service\ConsumeService;
 
-class ConsumerCommand extends Command
+class ConsumerCommand
 {
+
+    /** @var ConsumerRuntimeInterface */
+    private $runtime;
+
     /** @var ConsumeService */
     private $consumeService;
 
-    public function __construct(ConsumeService $consumeService)
-    {
-        parent::__construct('consume');
+    /** @var LoggerInterface */
+    private $logger;
+
+    public function __construct(
+        ConsumeService $consumeService,
+        LoggerInterface $logger
+    ) {
         $this->consumeService = $consumeService;
+        $this->logger = $logger;
     }
 
-    protected function configure()
-    {
-        $this->setName('consumer');
-    }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        $consumerContext = new ConsumerContext(
-            '1',
-            'queue1',
-            5
-        );
-
+    public function execute(
+        ConsumerRuntimeInterface $runtime,
+        ConsumerContext $consumerContext,
+        IsolatedConsumerInterface $consumer
+    ) {
         $uncommitedJobs = $this->consumeService->getJobsFromWorkingQueue($consumerContext);
 
         if ($uncommitedJobs) {
-            $output->writeln("Found Uncommited Jobs, start to recover.");
+            $this->logger->warning("Found Uncommited Jobs, start to recover.");
 
-            $this->processJobs($uncommitedJobs, $consumerContext, $output);
+            $this->processJobs($uncommitedJobs, $runtime, $consumerContext, $consumer);
         }
-
 
         while (true) {
 
-            $output->writeln("Start Waiting for Jobs");
+            $this->logger->info("Start Waiting for Jobs");
 
             $jobs = $this->consumeService->getJobs($consumerContext);
 
-            $this->processJobs($jobs, $consumerContext, $output);
+            if (!$jobs) {
+                $this->logger->info("no jobs pro process");
+                continue;
+            }
+
+            $this->processJobs($jobs, $runtime, $consumerContext, $consumer);
         }
 
-        $output->writeln("Finish");
+        $this->logger->info("Finish");
     }
 
-    private function processJobs(array $jobs, ConsumerContext $consumerContext, OutputInterface $output)
-    {
-        $output->writeln(sprintf("collected %d jobs", count($jobs)));
+    private function processJobs(
+        array $jobs,
+        ConsumerRuntimeInterface $runtime,
+        ConsumerContext $consumerContext,
+        IsolatedConsumerInterface $isolatedConsumer
+    ) {
+        $this->logger->info(sprintf("collected %d jobs", count($jobs)));
 
         if (!count($jobs)) {
-            $output->writeln(sprintf("no jobs."));
+            $this->logger->info(sprintf("no jobs."));
         }
 
-        $output->writeln("Start working on jobs");
+        $this->logger->info("Start working on jobs");
 
-        foreach ($jobs as $job) {
-            $output->writeln("Work on Job " . $job);
-        }
+        $runtime->run($jobs, $isolatedConsumer);
 
-        if (!empty($jobs)) {
-            $output->writeln("Commit Work");
-            $this->consumeService->commitWorkQueue($consumerContext);
-        }
+        $this->logger->info("Commit Work");
+        $this->consumeService->commitWorkQueue($consumerContext);
 
-        $output->writeln("Finish Work");
+        $this->logger->info("Finish Work");
     }
 
 }
