@@ -12,8 +12,13 @@
             <argument type="service" id="status_service"/>
         </service>
 
+        <service id="consumer_status_service" class="Tg\RedisQueue\Consumer\Service\ConsumerStatusService">
+            <argument type="service" id="redis"/>
+        </service>
+
         <service id="command_consumer" class="Tg\RedisQueue\Command\ConsumerCommand">
             <argument type="service" id="consume_service"/>
+            <argument type="service" id="consumer_status_service"/>
         </service>
 
         <service id="command_schedule" class="Tg\RedisQueue\Command\ScheduleCommand">

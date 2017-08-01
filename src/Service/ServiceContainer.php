@@ -9,6 +9,7 @@ use Tg\RedisQueue\Command\ProducerCommand;
 use Tg\RedisQueue\Command\ScheduleCommand;
 use Tg\RedisQueue\Consumer\Runtime\ConsumerRuntimeInterface;
 use Tg\RedisQueue\Consumer\Runtime\SimpleConsumerRuntime;
+use Tg\RedisQueue\Consumer\Service\ConsumerStatusService;
 use Tg\RedisQueue\Service\ConsumeService;
 use Tg\RedisQueue\Service\DateTimeProvider;
 use Tg\RedisQueue\Service\JobEnqueueService;
@@ -44,6 +45,9 @@ class ServiceContainer
     /** @var ConsumerRuntimeInterface */
     private $simpleConsumerRuntime;
 
+    /** @var ConsumerStatusService */
+    private $consumerStatusService;
+
     /** @var LoggerInterface */
     private $logger;
 
@@ -61,12 +65,25 @@ class ServiceContainer
         if (!$this->commandConsumer) {
             $this->commandConsumer = new ConsumerCommand(
                 $this->getConsumeService(),
+                $this->getConsumerStatusService(),
                 $this->getLogger()
             );
         }
 
         return $this->commandConsumer;
     }
+
+    public function getConsumerStatusService(): ConsumerStatusService
+    {
+        if (!$this->consumerStatusService) {
+            $this->consumerStatusService = new ConsumerStatusService(
+                $this->redis
+            );
+        }
+
+        return $this->consumerStatusService;
+    }
+
 
     public function getCommandProducer(): ProducerCommand
     {
@@ -162,5 +179,9 @@ class ServiceContainer
         return $this->simpleConsumerRuntime;
     }
 
+    public function getRedis(): \Redis
+    {
+        return $this->redis;
+    }
 
 }

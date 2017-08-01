@@ -6,25 +6,29 @@ use Psr\Log\LoggerInterface;
 use Tg\RedisQueue\Consumer\ConsumerContext;
 use Tg\RedisQueue\Consumer\Runtime\ConsumerRuntimeInterface;
 use Tg\RedisQueue\Consumer\IsolatedConsumerInterface;
+use Tg\RedisQueue\Consumer\Service\ConsumerStatusService;
+use Tg\RedisQueue\Consumer\Status\StatusStarted;
 use Tg\RedisQueue\Service\ConsumeService;
 
 class ConsumerCommand
 {
 
-    /** @var ConsumerRuntimeInterface */
-    private $runtime;
-
     /** @var ConsumeService */
     private $consumeService;
+
+    /** @var ConsumerStatusService */
+    private $consumerStatusService;
 
     /** @var LoggerInterface */
     private $logger;
 
     public function __construct(
         ConsumeService $consumeService,
+        ConsumerStatusService $consumerStatusService,
         LoggerInterface $logger
     ) {
         $this->consumeService = $consumeService;
+        $this->consumerStatusService = $consumerStatusService;
         $this->logger = $logger;
     }
 
@@ -34,11 +38,20 @@ class ConsumerCommand
         ConsumerContext $consumerContext,
         IsolatedConsumerInterface $consumer
     ) {
+
+        $this->consumerStatusService->addStatus(new StatusStarted(
+            'worker:'.$consumerContext->getConsumerNum(),
+            $consumerContext->getQueue(),
+            time(),
+            $consumerContext->getWorkQueue()
+        ));
+
         $uncommitedJobs = $this->consumeService->getJobsFromWorkingQueue($consumerContext);
 
         if ($uncommitedJobs) {
             $this->logger->warning("Found Uncommited Jobs, start to recover.");
 
+            //$this->consumerStatusService->addStatus($consumerContext, 'work on uncommited jobs');
             $this->processJobs($uncommitedJobs, $runtime, $consumerContext, $consumer);
         }
 
@@ -49,7 +62,7 @@ class ConsumerCommand
             $jobs = $this->consumeService->getJobs($consumerContext);
 
             if (!$jobs) {
-                $this->logger->info("no jobs pro process");
+                $this->logger->info("no jobs to process");
                 continue;
             }
 
