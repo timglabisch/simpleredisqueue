@@ -36,7 +36,8 @@ class ConsumerCommand
     public function execute(
         ConsumerRuntimeInterface $runtime,
         ConsumerContext $consumerContext,
-        IsolatedConsumerInterface $consumer
+        IsolatedConsumerInterface $consumer,
+        $loop = true
     ) {
 
         $this->consumerStatusService->addStatus(new StatusStarted(
@@ -55,11 +56,11 @@ class ConsumerCommand
             $this->processJobs($uncommitedJobs, $runtime, $consumerContext, $consumer);
         }
 
-        while (true) {
+        do {
 
             $this->logger->info("Start Waiting for Jobs");
 
-            $jobs = $this->consumeService->getJobs($consumerContext);
+            $jobs = $this->consumeService->getJobs($consumerContext, $this->logger);
 
             if (!$jobs) {
                 $this->logger->info("no jobs to process");
@@ -67,7 +68,7 @@ class ConsumerCommand
             }
 
             $this->processJobs($jobs, $runtime, $consumerContext, $consumer);
-        }
+        } while ($loop);
 
         $this->logger->info("Finish");
     }

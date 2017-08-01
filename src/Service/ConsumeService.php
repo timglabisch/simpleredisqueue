@@ -2,6 +2,7 @@
 
 namespace Tg\RedisQueue\Service;
 
+use Psr\Log\LoggerInterface;
 use Tg\RedisQueue\Consumer\ConsumerContext;
 use Tg\RedisQueue\Dto\Job;
 use Tg\RedisQueue\Dto\EnqueuedJob;
@@ -31,12 +32,12 @@ class ConsumeService
     }
 
     /** @return EnqueuedJobInterface[] */
-    public function getJobs(ConsumerContext $consumerContext): array
+    public function getJobs(ConsumerContext $consumerContext, LoggerInterface $logger): array
     {
 
         $jobs = [];
 
-        $elapsedTime = 0;
+        $startTime = microtime(true);
 
         while (true) {
             $job = $this->redis->brpoplpush($consumerContext->getQueue(), $consumerContext->getWorkQueue(), $consumerContext->getTickTimeout());
@@ -45,19 +46,17 @@ class ConsumeService
                 $jobs[] = $job;
             }
 
-            $elapsedTime += $consumerContext->getTickTimeout();
-
             if (count($jobs) >= $consumerContext->getMaxJobsToDequeue()) {
                 break;
             }
 
+            $elapsedTime = microtime(true) - $startTime;
             if ($elapsedTime >= $consumerContext->getTimeout()) {
                 break;
             }
 
-            echo "time left to collect jobs\n";
+            $logger->info("time left to collect jobs");
 
-            //$output->writeln("time left to collect jobs");
             continue;
         }
 
