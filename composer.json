@@ -1,6 +1,6 @@
 {
   "name": "tg/simepleredisqueue",
-  "description": "kafka example",
+  "description": "simpleredisqueue",
   "license": "MIT",
   "require": {
     "psr/log": "1.*"
