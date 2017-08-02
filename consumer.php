@@ -14,7 +14,7 @@ $context = ConsumerContext::newFromEnv();
 
 $container = new ServiceContainer(
     new Logger(),
-    RedisFactory::create($context->getRedis(), $context->getRedisPort())
+    RedisFactory::create($context->getRedis(), $context->getRedisPort(), 8)
 );
 
 $container->getCommandConsumer()->execute(

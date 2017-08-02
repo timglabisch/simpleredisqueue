@@ -10,7 +10,7 @@ use Tg\RedisQueue\Service\ServiceContainer;
 
 require __DIR__ . '/vendor/autoload.php';
 
-$redis = RedisFactory::create('127.0.0.1', 6379);
+$redis = RedisFactory::create('127.0.0.1', 6379, 8);
 
 $container = new ServiceContainer(
     new Logger(),

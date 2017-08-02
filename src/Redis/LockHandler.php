@@ -3,8 +3,8 @@
 namespace Tg\RedisQueue\Redis;
 
 use Psr\Log\LoggerInterface;
-use Tg\RedisQueue\Redis\Exception\CouldNotAcquireLockException;
-use Tg\RedisQueue\Redis\Key\Key;
+use Tg\RedisQueue\Exception\CouldNotAcquireLockException;
+use Tg\RedisQueue\Redis\Lock\Key;
 
 class LockHandler
 {
@@ -44,7 +44,7 @@ class LockHandler
         return $res;
     }
 
-    private function acquire(Key $key, $seconds = 60): bool
+    private function acquire(Key $key, int $seconds = 60): bool
     {
         $script = '
             if redis.call("GET", KEYS[1]) == ARGV[1] then
@@ -54,7 +54,7 @@ class LockHandler
             end
         ';
 
-        return (bool)$this->redis->eval($script, [(string)$key], [$key->getToken(), $seconds * 1000]);
+        return $this->redis->eval($script, [(string)$key, $key->getToken(), $seconds * 1000], 1);
     }
 
     private function release(Key $key)
@@ -67,6 +67,6 @@ class LockHandler
             end
         ';
 
-        $this->redis->eval($script, [(string)$key], [$key->getToken()]);
+        $this->redis->eval($script, [(string)$key, $key->getToken()], 1);
     }
 }

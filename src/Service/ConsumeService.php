@@ -30,7 +30,7 @@ class ConsumeService
     public function getJobsFromWorkingQueue(ConsumerContext $consumerContext): array
     {
         $rawJobs = $this->lockHandler->doInLock($consumerContext->getWorkQueue(), 60, function() use ($consumerContext) {
-            $this->redis->lRange($consumerContext->getWorkQueue(), 0, -1);
+            return $this->redis->lRange($consumerContext->getWorkQueue(), 0, -1);
         });
 
         return array_map(

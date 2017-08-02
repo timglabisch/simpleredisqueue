@@ -1,6 +1,6 @@
 <?php
 
-namespace Tg\RedisQueue\Redis\Exception;
+namespace Tg\RedisQueue\Exception;
 
 class CouldNotAcquireLockException extends \LogicException
 {

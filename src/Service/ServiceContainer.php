@@ -66,7 +66,7 @@ class ServiceContainer
 
     public function getLockHandler(): LockHandler
     {
-        return $this->lockHandler ?? new LockHandler($this->getRedis());
+        return $this->lockHandler ?? new LockHandler($this->getRedis(), $this->getLogger());
     }
 
     public function getCommandConsumer(): ConsumerCommand
@@ -119,7 +119,8 @@ class ServiceContainer
     {
         if (!$this->consumeService) {
             $this->consumeService = new ConsumeService(
-                $this->redis
+                $this->redis,
+                $this->getLockHandler()
             );
         }
 
