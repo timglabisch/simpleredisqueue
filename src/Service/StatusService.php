@@ -22,13 +22,12 @@ class StatusService
         $this->dateTimeProvider = $dateTimeProvider;
     }
 
-    public function createStatus(EnqueuedJobInterface $trackedJob)
+    public function addStatus(EnqueuedJobInterface $trackedJob, $identifer, string $value, int $ttl)
     {
-        $this->addStatus($trackedJob, StatusEntry::STATUS_CREATED, '');
-    }
+        if ($ttl === 0) {
+            return;
+        }
 
-    public function addStatus(EnqueuedJobInterface $trackedJob, $identifer, string $value)
-    {
         $statuskey = 'status:' . $trackedJob->getJobId();
 
         $this->redis->multi();
@@ -36,7 +35,7 @@ class StatusService
             $statuskey,
             (new StatusEntry($identifer, $value, $this->dateTimeProvider->now()))->__toString()
         );
-        $this->redis->expire($statuskey, 10);//60 * 60 * 24);
+        $this->redis->expire($statuskey, $ttl);
         $res = $this->redis->exec();
 
         if (!is_array($res) || !isset($res[0], $res[1]) || !$res[0] || !$res[1]) {

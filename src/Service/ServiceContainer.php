@@ -10,6 +10,7 @@ use Tg\RedisQueue\Command\ScheduleCommand;
 use Tg\RedisQueue\Consumer\Runtime\ConsumerRuntimeInterface;
 use Tg\RedisQueue\Consumer\Runtime\SimpleConsumerRuntime;
 use Tg\RedisQueue\Consumer\Service\ConsumerStatusService;
+use Tg\RedisQueue\Redis\LockHandler;
 use Tg\RedisQueue\Service\ConsumeService;
 use Tg\RedisQueue\Service\DateTimeProvider;
 use Tg\RedisQueue\Service\JobEnqueueService;
@@ -48,6 +49,9 @@ class ServiceContainer
     /** @var ConsumerStatusService */
     private $consumerStatusService;
 
+    /** @var LockHandler */
+    private $lockHandler;
+
     /** @var LoggerInterface */
     private $logger;
 
@@ -58,6 +62,11 @@ class ServiceContainer
     {
         $this->logger = $logger;
         $this->redis = $redis;
+    }
+
+    public function getLockHandler(): LockHandler
+    {
+        return $this->lockHandler ?? new LockHandler($this->getRedis());
     }
 
     public function getCommandConsumer(): ConsumerCommand
