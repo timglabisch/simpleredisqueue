@@ -4,10 +4,11 @@ namespace Tg\RedisQueue\Command;
 
 use Psr\Log\LoggerInterface;
 use Tg\RedisQueue\Consumer\ConsumerContext;
-use Tg\RedisQueue\Consumer\Runtime\ConsumerRuntimeInterface;
 use Tg\RedisQueue\Consumer\IsolatedConsumerInterface;
+use Tg\RedisQueue\Consumer\Runtime\ConsumerRuntimeInterface;
 use Tg\RedisQueue\Consumer\Service\ConsumerStatusService;
 use Tg\RedisQueue\Consumer\Status\StatusStarted;
+use Tg\RedisQueue\Lock\FilesystemLockHandler;
 use Tg\RedisQueue\Service\ConsumeService;
 
 class ConsumerCommand
@@ -22,26 +23,47 @@ class ConsumerCommand
     /** @var LoggerInterface */
     private $logger;
 
+    /** @var FilesystemLockHandler */
+    private $filesystemLockHandler;
+
     public function __construct(
         ConsumeService $consumeService,
         ConsumerStatusService $consumerStatusService,
-        LoggerInterface $logger
-    ) {
+        LoggerInterface $logger,
+        FilesystemLockHandler $filesystemLockHandler
+    )
+    {
         $this->consumeService = $consumeService;
         $this->consumerStatusService = $consumerStatusService;
         $this->logger = $logger;
+        $this->filesystemLockHandler = $filesystemLockHandler;
     }
-
 
     public function execute(
         ConsumerRuntimeInterface $runtime,
         ConsumerContext $consumerContext,
         IsolatedConsumerInterface $consumer,
         $loop = true
-    ): int {
+    )
+    {
+        return $this->filesystemLockHandler->doInLock($consumerContext->getWorkQueue(),
+            function() use ($runtime, $consumerContext, $consumer, $loop) {
+                return $this->executeInLocalLock($runtime, $consumerContext, $consumer, $loop);
+            }
+        );
+
+    }
+
+    private function executeInLocalLock(
+        ConsumerRuntimeInterface $runtime,
+        ConsumerContext $consumerContext,
+        IsolatedConsumerInterface $consumer,
+        $loop = true
+    ): int
+    {
 
         $this->consumerStatusService->addStatus(new StatusStarted(
-            'worker:'.$consumerContext->getConsumerNum(),
+            'worker:' . $consumerContext->getConsumerNum(),
             $consumerContext->getQueue(),
             time(),
             $consumerContext->getWorkQueue()
@@ -59,7 +81,6 @@ class ConsumerCommand
         $jobCounter = 0;
 
         do {
-
             $this->logger->info("Start Waiting for Jobs");
 
             $jobs = $this->consumeService->getJobs($consumerContext, $this->logger);
@@ -84,7 +105,8 @@ class ConsumerCommand
         ConsumerRuntimeInterface $runtime,
         ConsumerContext $consumerContext,
         IsolatedConsumerInterface $isolatedConsumer
-    ) {
+    )
+    {
         $this->logger->info(sprintf("collected %d jobs", count($jobs)));
 
         if (!count($jobs)) {

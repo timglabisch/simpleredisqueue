@@ -39,6 +39,7 @@ class ConsumerStatusService
         $payload = $payload ? json_encode($payload) : '';
 
         $this->redis->expire('consumerlog:' . $context->getConsumerNum(), 3600);
+        $this->redis->zRemRangeByScore('consumerlog', 0, time() - 600);
         $this->redis->zAdd('consumerlog:' . $context->getConsumerNum(), time(), 'worker:' . $context->getConsumerNum() . '|' . time() . '|' . $status . '|' . $payload);
     }
 
@@ -49,6 +50,7 @@ class ConsumerStatusService
                 continue;
             }
 
+            $this->redis->zRemRangeByScore('consumerlog', 0, time() - 600); // drop old entries.
             $this->redis->zAdd('consumerlog', time(), $codec->encode($status));
             return;
         }

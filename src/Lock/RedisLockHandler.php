@@ -1,12 +1,12 @@
 <?php
 
-namespace Tg\RedisQueue\Redis;
+namespace Tg\RedisQueue\Lock;
 
 use Psr\Log\LoggerInterface;
 use Tg\RedisQueue\Exception\CouldNotAcquireLockException;
-use Tg\RedisQueue\Redis\Lock\Key;
+use Tg\RedisQueue\Lock\Lock\Key;
 
-class LockHandler
+class RedisLockHandler
 {
     private $redis;
 
@@ -18,7 +18,7 @@ class LockHandler
         $this->logger = $logger;
     }
 
-    public function createLockKey(string $string)
+    private function createLockKey(string $string)
     {
         return new Key($string);
     }

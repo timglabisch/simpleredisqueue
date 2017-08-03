@@ -1,6 +1,6 @@
 <?php
 
-namespace Tg\RedisQueue\Redis\Lock;
+namespace Tg\RedisQueue\Lock\Lock;
 
 class Key
 {

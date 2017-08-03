@@ -10,12 +10,8 @@ use Tg\RedisQueue\Command\ScheduleCommand;
 use Tg\RedisQueue\Consumer\Runtime\ConsumerRuntimeInterface;
 use Tg\RedisQueue\Consumer\Runtime\SimpleConsumerRuntime;
 use Tg\RedisQueue\Consumer\Service\ConsumerStatusService;
-use Tg\RedisQueue\Redis\LockHandler;
-use Tg\RedisQueue\Service\ConsumeService;
-use Tg\RedisQueue\Service\DateTimeProvider;
-use Tg\RedisQueue\Service\JobEnqueueService;
-use Tg\RedisQueue\Service\ScheduleService;
-use Tg\RedisQueue\Service\StatusService;
+use Tg\RedisQueue\Lock\FilesystemLockHandler;
+use Tg\RedisQueue\Lock\RedisLockHandler;
 
 class ServiceContainer
 {
@@ -49,8 +45,11 @@ class ServiceContainer
     /** @var ConsumerStatusService */
     private $consumerStatusService;
 
-    /** @var LockHandler */
-    private $lockHandler;
+    /** @var RedisLockHandler */
+    private $redisLockHandler;
+
+    /** @var FilesystemLockHandler */
+    private $filesystemLockHandler;
 
     /** @var LoggerInterface */
     private $logger;
@@ -64,9 +63,14 @@ class ServiceContainer
         $this->redis = $redis;
     }
 
-    public function getLockHandler(): LockHandler
+    public function getFilesystemLockHandler(): FilesystemLockHandler
     {
-        return $this->lockHandler ?? new LockHandler($this->getRedis(), $this->getLogger());
+        return $this->filesystemLockHandler ?? new FilesystemLockHandler($this->getLogger());
+    }
+
+    public function getRedisLockHandler(): RedisLockHandler
+    {
+        return $this->redisLockHandler ?? new RedisLockHandler($this->getRedis(), $this->getLogger());
     }
 
     public function getCommandConsumer(): ConsumerCommand
@@ -75,7 +79,8 @@ class ServiceContainer
             $this->commandConsumer = new ConsumerCommand(
                 $this->getConsumeService(),
                 $this->getConsumerStatusService(),
-                $this->getLogger()
+                $this->getLogger(),
+                $this->getFilesystemLockHandler()
             );
         }
 
@@ -120,7 +125,7 @@ class ServiceContainer
         if (!$this->consumeService) {
             $this->consumeService = new ConsumeService(
                 $this->redis,
-                $this->getLockHandler()
+                $this->getRedisLockHandler()
             );
         }
 
