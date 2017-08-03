@@ -10,6 +10,7 @@ use Tg\RedisQueue\Command\ScheduleCommand;
 use Tg\RedisQueue\Consumer\Runtime\ConsumerRuntimeInterface;
 use Tg\RedisQueue\Consumer\Runtime\SimpleConsumerRuntime;
 use Tg\RedisQueue\Consumer\Service\ConsumerStatusService;
+use Tg\RedisQueue\Consumer\Service\QueueStatusService;
 use Tg\RedisQueue\Lock\FilesystemLockHandler;
 use Tg\RedisQueue\Lock\RedisLockHandler;
 
@@ -51,6 +52,9 @@ class ServiceContainer
     /** @var FilesystemLockHandler */
     private $filesystemLockHandler;
 
+    /** @var QueueStatusService */
+    private $queueStatusService;
+
     /** @var LoggerInterface */
     private $logger;
 
@@ -85,6 +89,11 @@ class ServiceContainer
         }
 
         return $this->commandConsumer;
+    }
+
+    public function getQueueStatusService(): QueueStatusService
+    {
+        return $this->queueStatusService ?? new QueueStatusService($this->redis);
     }
 
     public function getConsumerStatusService(): ConsumerStatusService

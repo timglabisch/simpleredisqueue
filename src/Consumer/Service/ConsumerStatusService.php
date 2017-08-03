@@ -50,7 +50,7 @@ class ConsumerStatusService
                 continue;
             }
 
-            $this->redis->zRemRangeByScore('consumerlog', 0, time() - 600); // drop old entries.
+            $this->redis->zRemRangeByScore('consumerlog', 0, time() - 4000); // drop old entries.
             $this->redis->zAdd('consumerlog', time(), $codec->encode($status));
             return;
         }
