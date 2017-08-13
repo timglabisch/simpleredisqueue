@@ -4,6 +4,7 @@ namespace Tg\RedisQueue\Consumer\Runtime;
 
 
 use Psr\Log\LoggerInterface;
+use Tg\RedisQueue\Consumer\ConsumerContext;
 use Tg\RedisQueue\Consumer\Runtime\ConsumerRuntimeInterface;
 use Tg\RedisQueue\Consumer\IsolatedConsumerContext;
 use Tg\RedisQueue\Consumer\IsolatedConsumerInterface;
@@ -31,16 +32,22 @@ class SimpleConsumerRuntime implements ConsumerRuntimeInterface
         $this->logger = $logger;
     }
 
-
-    public function run(array $jobs, IsolatedConsumerInterface $isolatedConsumer)
+    public function isReady(): bool
     {
-        $context = new IsolatedConsumerContext(
+        return true;
+    }
+
+    public function run(array $jobs, ConsumerContext $context, IsolatedConsumerInterface $isolatedConsumer, callable $commit)
+    {
+        $isolatedConsumerContext = new IsolatedConsumerContext(
             $this->enqueueService,
             $this->statusService,
             $this->logger
         );
 
-        $isolatedConsumer->handle($jobs, $context);
+        $isolatedConsumer->handle($jobs, $isolatedConsumerContext);
+
+        $commit();
     }
 
 }

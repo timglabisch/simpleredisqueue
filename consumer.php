@@ -18,7 +18,7 @@ $container = new ServiceContainer(
 );
 
 $container->getCommandConsumer()->execute(
-    $container->getSimpleConsumerRuntime(),
+    $container->getForkedConsumerRuntime(),
     $context,
     new class implements \Tg\RedisQueue\Consumer\IsolatedConsumerInterface
     {

@@ -8,6 +8,7 @@ use Tg\RedisQueue\Command\ConsumerCommand;
 use Tg\RedisQueue\Command\ProducerCommand;
 use Tg\RedisQueue\Command\ScheduleCommand;
 use Tg\RedisQueue\Consumer\Runtime\ConsumerRuntimeInterface;
+use Tg\RedisQueue\Consumer\Runtime\ForkedConsumerRuntime;
 use Tg\RedisQueue\Consumer\Runtime\SimpleConsumerRuntime;
 use Tg\RedisQueue\Consumer\Service\ConsumerStatusService;
 use Tg\RedisQueue\Consumer\Service\QueueStatusService;
@@ -42,6 +43,9 @@ class ServiceContainer
 
     /** @var ConsumerRuntimeInterface */
     private $simpleConsumerRuntime;
+
+    /** @var ConsumerRuntimeInterface */
+    private $forkedConsumerRuntime;
 
     /** @var ConsumerStatusService */
     private $consumerStatusService;
@@ -188,6 +192,15 @@ class ServiceContainer
     public function getLogger(): LoggerInterface
     {
         return $this->logger;
+    }
+
+    public function getForkedConsumerRuntime(): ConsumerRuntimeInterface
+    {
+        return $this->forkedConsumerRuntime ?? new ForkedConsumerRuntime(
+                $this->getJobEnqueueService(),
+                $this->getStatusService(),
+                $this->getLogger()
+            );
     }
 
     public function getSimpleConsumerRuntime(): ConsumerRuntimeInterface
